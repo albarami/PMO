@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMO Report Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #fafafa;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f5f5ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f0ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 60px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .file-info.active {
+            display: block;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
+            width: 100%;
+            display: none;
+        }
+
+        .upload-btn.active {
+            display: block;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .upload-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 15px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .features {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .features h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            color: #666;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 PMO Report Generator</h1>
+        <p class="subtitle">Upload your Excel PMO tracker to generate professional PDF reports</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Choose Excel file or drag it here</div>
+            <div class="upload-subtext">Supports .xlsx and .xls files up to 50MB</div>
+            <input type="file" id="fileInput" accept=".xlsx,.xls">
+        </div>
+        
+        <div class="file-info" id="fileInfo">
+            <strong>Selected File:</strong> <span id="fileName"></span><br>
+            <strong>Size:</strong> <span id="fileSize"></span>
+        </div>
+        
+        <button class="upload-btn" id="uploadBtn" disabled>Generate Reports</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing your file...</p>
+            <p style="font-size: 0.9rem; color: #666; margin-top: 10px;">This may take a few moments depending on the number of projects.</p>
+        </div>
+        
+        <div class="message" id="message"></div>
+        
+        <div class="features">
+            <h3>Features</h3>
+            <ul class="feature-list">
+                <li>Automatic column detection with flexible naming</li>
+                <li>Professional PDF reports with charts and metrics</li>
+                <li>Budget utilization calculations</li>
+                <li>Timeline progress tracking</li>
+                <li>Health status indicators</li>
+                <li>Individual and combined reports</li>
+                <li>Risk and issue tracking</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const loading = document.getElementById('loading');
+        const message = document.getElementById('message');
+        
+        let selectedFile = null;
+        
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+                              'application/vnd.ms-excel'];
+            
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/i)) {
+                showMessage('Please select a valid Excel file (.xlsx or .xls)', 'error');
+                return;
+            }
+            
+            if (file.size > 50 * 1024 * 1024) {
+                showMessage('File size exceeds 50MB limit', 'error');
+                return;
+            }
+            
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.classList.add('active');
+            uploadBtn.classList.add('active');
+            uploadBtn.disabled = false;
+            message.style.display = 'none';
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+        
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = 'message ' + type;
+        }
+        
+        // Upload file
+        uploadBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            uploadBtn.disabled = true;
+            loading.classList.add('active');
+            message.style.display = 'none';
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    loading.classList.remove('active');
+                    
+                    const successMsg = document.createElement('div');
+                    successMsg.className = 'message success';
+                    successMsg.innerHTML = `
+                        ${data.message}<br>
+                        <strong>Projects processed:</strong> ${data.project_count}<br>
+                        <a href="${data.download_url}" class="download-btn">📥 Download Reports</a>
+                    `;
+                    message.replaceWith(successMsg);
+                    
+                    uploadBtn.disabled = false;
+                } else {
+                    loading.classList.remove('active');
+                    showMessage(data.error || 'An error occurred during processing', 'error');
+                    uploadBtn.disabled = false;
+                }
+            } catch (error) {
+                loading.classList.remove('active');
+                showMessage('Network error: ' + error.message, 'error');
+                uploadBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
