@@ -8,6 +8,10 @@ import os
 import io
 import json
 import zipfile
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, send_file, jsonify
 import pandas as pd
@@ -32,6 +36,7 @@ from pmo_helpers import *
 from pmo_report_generator import *
 from word_generator import create_word_report, generate_individual_word_report
 from llm_integration import format_project_text
+from excel_generator import create_excel_report, generate_individual_excel_report
 
 # Flask Routes
 @app.route('/')
@@ -80,6 +85,10 @@ def upload_file():
         word_path = os.path.join(output_dir, f'PMO_Project_Reports_Combined.docx')
         create_word_report(projects, word_path)
         
+        # Generate Excel report with all data
+        excel_path = os.path.join(output_dir, f'PMO_Project_Reports_Summary.xlsx')
+        create_excel_report(projects, excel_path)
+        
         # Generate individual project reports
         individual_dir = os.path.join(output_dir, 'individual_reports')
         os.makedirs(individual_dir, exist_ok=True)
@@ -102,6 +111,7 @@ def upload_file():
             # Add combined reports
             zipf.write(pdf_path, os.path.basename(pdf_path))
             zipf.write(word_path, os.path.basename(word_path))
+            zipf.write(excel_path, os.path.basename(excel_path))
             
             # Add individual reports
             for root, dirs, files in os.walk(individual_dir):

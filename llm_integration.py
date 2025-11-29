@@ -42,6 +42,7 @@ CRITICAL RULES:
         self.model = None
         
         # Try to initialize available LLM providers
+        # Try OpenAI first, then Anthropic, then Azure
         self._init_openai()
         if not self.client:
             self._init_anthropic()

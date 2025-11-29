@@ -252,15 +252,15 @@
         <div class="features">
             <h3>Features</h3>
             <ul class="feature-list">
-                <li>Automatic column detection with flexible naming</li>
-                <li>Professional PDF reports with charts and metrics</li>
-                <li>Editable Word documents (.docx) for all reports</li>
-                <li>Budget utilization calculations</li>
-                <li>Timeline progress tracking</li>
-                <li>Health status indicators</li>
-                <li>Individual and combined reports</li>
-                <li>Risk and issue tracking</li>
-                <li>Optional LLM text formatting (when configured)</li>
+                <li>📊 <strong>Excel Summary Report</strong> with dashboard and all project data</li>
+                <li>📄 <strong>Professional PDF reports</strong> with charts and metrics</li>
+                <li>📝 <strong>Editable Word documents</strong> (.docx) for all reports</li>
+                <li>💰 Budget utilization calculations</li>
+                <li>📈 Timeline progress tracking</li>
+                <li>🚦 Health status indicators (On Track / At Risk / Off Track)</li>
+                <li>📦 Individual and combined reports</li>
+                <li>⚠️ Risk and issue tracking</li>
+                <li>🤖 AI text formatting with OpenAI (Active)</li>
             </ul>
         </div>
     </div>
@@ -372,7 +372,8 @@
                     successMsg.innerHTML = `
                         ${data.message}<br>
                         <strong>Projects processed:</strong> ${data.project_count}<br>
-                        <a href="${data.download_url}" class="download-btn">📥 Download Reports</a>
+                        <strong>Reports generated:</strong> Excel + PDF + Word<br>
+                        <a href="${data.download_url}" class="download-btn">📥 Download All Reports (ZIP)</a>
                     `;
                     message.replaceWith(successMsg);
                     
