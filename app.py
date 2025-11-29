@@ -36,7 +36,9 @@ from pmo_helpers import *
 from pmo_report_generator import *
 from professional_pdf_generator import generate_professional_pdf
 from spld_health_report import generate_spld_health_report
+from spld_exact_format import generate_spld_exact_report
 from word_generator import create_word_report, generate_individual_word_report
+from spld_word_generator import create_spld_word_report, generate_individual_spld_word
 from llm_integration import format_project_text
 from excel_generator import create_excel_report, generate_individual_excel_report
 
@@ -79,13 +81,13 @@ def upload_file():
         output_dir = os.path.join(temp_dir, f'pmo_reports_{timestamp}')
         os.makedirs(output_dir, exist_ok=True)
         
-        # Generate combined PDF (SPLD Executive Dashboard Style)
+        # Generate combined PDF (Exact SPLD PMO Committee Format)
         pdf_path = os.path.join(output_dir, f'PMO_Project_Reports_Combined.pdf')
-        generate_spld_health_report(projects, pdf_path)
+        generate_spld_exact_report(projects, pdf_path)
         
-        # Generate combined Word document
+        # Generate combined Word document (SPLD Format)
         word_path = os.path.join(output_dir, f'PMO_Project_Reports_Combined.docx')
-        create_word_report(projects, word_path)
+        create_spld_word_report(projects, word_path)
         
         # Generate Excel report with all data
         excel_path = os.path.join(output_dir, f'PMO_Project_Reports_Summary.xlsx')
