@@ -30,6 +30,8 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max
 # Import helper modules
 from pmo_helpers import *
 from pmo_report_generator import *
+from word_generator import create_word_report, generate_individual_word_report
+from llm_integration import format_project_text
 
 # Flask Routes
 @app.route('/')
@@ -57,32 +59,49 @@ def upload_file():
         if error:
             return jsonify({'error': error}), 400
         
+        # Apply LLM formatting if available (text only, no calculations)
+        for i in range(len(projects)):
+            projects[i] = format_project_text(projects[i])
+        
         # Generate reports
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
         # Create output directory
-        output_dir = f'/tmp/pmo_reports_{timestamp}'
+        import tempfile
+        temp_dir = tempfile.gettempdir()
+        output_dir = os.path.join(temp_dir, f'pmo_reports_{timestamp}')
         os.makedirs(output_dir, exist_ok=True)
         
         # Generate combined PDF
-        pdf_path = os.path.join(output_dir, f'PMO_Project_Reports_{timestamp}.pdf')
+        pdf_path = os.path.join(output_dir, f'PMO_Project_Reports_Combined.pdf')
         generate_pdf_report(projects, pdf_path)
         
-        # Generate individual project PDFs
+        # Generate combined Word document
+        word_path = os.path.join(output_dir, f'PMO_Project_Reports_Combined.docx')
+        create_word_report(projects, word_path)
+        
+        # Generate individual project reports
         individual_dir = os.path.join(output_dir, 'individual_reports')
         os.makedirs(individual_dir, exist_ok=True)
         
         for project in projects:
             safe_name = "".join(c for c in str(project['name'])[:50] if c.isalnum() or c in (' ', '-', '_')).strip()
             safe_name = safe_name.replace(' ', '_')
+            
+            # Individual PDF
             individual_pdf = os.path.join(individual_dir, f'{safe_name}_Report.pdf')
             generate_pdf_report([project], individual_pdf)
+            
+            # Individual Word document
+            individual_word = os.path.join(individual_dir, f'{safe_name}_Report.docx')
+            generate_individual_word_report(project, individual_word)
         
         # Create ZIP file with all reports
-        zip_path = f'/tmp/PMO_Reports_{timestamp}.zip'
+        zip_path = os.path.join(temp_dir, f'PMO_Reports_{timestamp}.zip')
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            # Add combined report
+            # Add combined reports
             zipf.write(pdf_path, os.path.basename(pdf_path))
+            zipf.write(word_path, os.path.basename(word_path))
             
             # Add individual reports
             for root, dirs, files in os.walk(individual_dir):
@@ -105,7 +124,9 @@ def upload_file():
 
 @app.route('/download/<timestamp>')
 def download_file(timestamp):
-    zip_path = f'/tmp/PMO_Reports_{timestamp}.zip'
+    import tempfile
+    temp_dir = tempfile.gettempdir()
+    zip_path = os.path.join(temp_dir, f'PMO_Reports_{timestamp}.zip')
     if os.path.exists(zip_path):
         return send_file(
             zip_path,

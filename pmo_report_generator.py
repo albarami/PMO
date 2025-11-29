@@ -16,74 +16,75 @@ def create_styles():
     """Create custom paragraph styles for the report."""
     styles = getSampleStyleSheet()
     
-    # Title style
-    styles.add(ParagraphStyle(
-        name='ReportTitle',
-        parent=styles['Heading1'],
-        fontSize=18,
-        textColor=colors.Color(0.2, 0.4, 0.6),
-        spaceAfter=20,
-        alignment=TA_CENTER
-    ))
+    # Check if custom styles already exist to avoid duplicates
+    if 'ReportTitle' not in styles:
+        styles.add(ParagraphStyle(
+            name='ReportTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            textColor=colors.Color(0.2, 0.4, 0.6),
+            spaceAfter=20,
+            alignment=TA_CENTER
+        ))
     
-    # Project name style
-    styles.add(ParagraphStyle(
-        name='ProjectName',
-        parent=styles['Heading2'],
-        fontSize=14,
-        textColor=colors.Color(0.9, 0.5, 0.2),  # Orange
-        spaceBefore=10,
-        spaceAfter=5
-    ))
+    if 'ProjectName' not in styles:
+        styles.add(ParagraphStyle(
+            name='ProjectName',
+            parent=styles['Heading2'],
+            fontSize=14,
+            textColor=colors.Color(0.9, 0.5, 0.2),  # Orange
+            spaceBefore=10,
+            spaceAfter=5
+        ))
     
-    # Section header style
-    styles.add(ParagraphStyle(
-        name='SectionHeader',
-        parent=styles['Heading3'],
-        fontSize=11,
-        textColor=colors.Color(0.9, 0.5, 0.2),
-        spaceBefore=12,
-        spaceAfter=6,
-        fontName='Helvetica-Bold'
-    ))
+    if 'SectionHeader' not in styles:
+        styles.add(ParagraphStyle(
+            name='SectionHeader',
+            parent=styles['Heading3'],
+            fontSize=11,
+            textColor=colors.Color(0.9, 0.5, 0.2),
+            spaceBefore=12,
+            spaceAfter=6,
+            fontName='Helvetica-Bold'
+        ))
     
-    # Body text style
-    styles.add(ParagraphStyle(
-        name='BodyText',
-        parent=styles['Normal'],
-        fontSize=9,
-        leading=12,
-        spaceBefore=3,
-        spaceAfter=3
-    ))
+    if 'PMOBodyText' not in styles:
+        styles.add(ParagraphStyle(
+            name='PMOBodyText',
+            parent=styles['Normal'],
+            fontSize=9,
+            leading=12,
+            spaceBefore=3,
+            spaceAfter=3
+        ))
     
-    # Small text for tables
-    styles.add(ParagraphStyle(
-        name='TableText',
-        parent=styles['Normal'],
-        fontSize=8,
-        leading=10
-    ))
+    if 'TableText' not in styles:
+        styles.add(ParagraphStyle(
+            name='TableText',
+            parent=styles['Normal'],
+            fontSize=8,
+            leading=10
+        ))
     
-    # Label style
-    styles.add(ParagraphStyle(
-        name='Label',
-        parent=styles['Normal'],
-        fontSize=8,
-        textColor=colors.gray,
-        spaceBefore=2,
-        spaceAfter=1
-    ))
+    if 'Label' not in styles:
+        styles.add(ParagraphStyle(
+            name='Label',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=colors.gray,
+            spaceBefore=2,
+            spaceAfter=1
+        ))
     
-    # Value style
-    styles.add(ParagraphStyle(
-        name='Value',
-        parent=styles['Normal'],
-        fontSize=9,
-        fontName='Helvetica-Bold',
-        spaceBefore=0,
-        spaceAfter=4
-    ))
+    if 'Value' not in styles:
+        styles.add(ParagraphStyle(
+            name='Value',
+            parent=styles['Normal'],
+            fontSize=9,
+            fontName='Helvetica-Bold',
+            spaceBefore=0,
+            spaceAfter=4
+        ))
     
     return styles
 
@@ -97,7 +98,7 @@ def create_project_report_page(project, styles):
         [
             Paragraph(f"<b>Project Status Report</b>", styles['ReportTitle']),
             '',
-            Paragraph(f"<b>Report Date:</b> {datetime.now().strftime('%d/%m/%Y')}", styles['BodyText'])
+            Paragraph(f"<b>Report Date:</b> {datetime.now().strftime('%d/%m/%Y')}", styles['PMOBodyText'])
         ],
         [
             Paragraph(f"<font color='#E07020'><b>{project['name']}</b></font>", styles['ProjectName']),
@@ -177,23 +178,23 @@ def create_project_report_page(project, styles):
     
     # Left column - Timeline Progress
     left_col_data.append([Paragraph("<font color='#E07020'><b>Project Timeline</b></font>", styles['SectionHeader'])])
-    left_col_data.append([Paragraph(f"<b>Actual Progress:</b> {project['timeline_actual']:.1f}%", styles['BodyText'])])
-    left_col_data.append([Paragraph(f"<b>Planned Progress:</b> {project['timeline_planned']:.1f}%", styles['BodyText'])])
+    left_col_data.append([Paragraph(f"<b>Actual Progress:</b> {project['timeline_actual']:.1f}%", styles['PMOBodyText'])])
+    left_col_data.append([Paragraph(f"<b>Planned Progress:</b> {project['timeline_planned']:.1f}%", styles['PMOBodyText'])])
     
     variance_color = 'green' if project['schedule_variance'] >= 0 else 'red'
-    left_col_data.append([Paragraph(f"<b>Schedule Variance:</b> <font color='{variance_color}'>{project['schedule_variance']:+.1f}%</font>", styles['BodyText'])])
+    left_col_data.append([Paragraph(f"<b>Schedule Variance:</b> <font color='{variance_color}'>{project['schedule_variance']:+.1f}%</font>", styles['PMOBodyText'])])
     left_col_data.append([Spacer(1, 10)])
     
     # Budget section
     left_col_data.append([Paragraph("<font color='#E07020'><b>Budget Utilization</b></font>", styles['SectionHeader'])])
-    left_col_data.append([Paragraph(f"<b>Total Budget:</b> {project['budget_total']:,.2f} SAR", styles['BodyText'])])
-    left_col_data.append([Paragraph(f"<b>Spent:</b> {project['budget_spent']:,.2f} SAR ({project['budget_spent_pct']:.1f}%)", styles['BodyText'])])
-    left_col_data.append([Paragraph(f"<b>Remaining:</b> {project['budget_remaining']:,.2f} SAR ({project['budget_remaining_pct']:.1f}%)", styles['BodyText'])])
+    left_col_data.append([Paragraph(f"<b>Total Budget:</b> {project['budget_total']:,.2f} SAR", styles['PMOBodyText'])])
+    left_col_data.append([Paragraph(f"<b>Spent:</b> {project['budget_spent']:,.2f} SAR ({project['budget_spent_pct']:.1f}%)", styles['PMOBodyText'])])
+    left_col_data.append([Paragraph(f"<b>Remaining:</b> {project['budget_remaining']:,.2f} SAR ({project['budget_remaining_pct']:.1f}%)", styles['PMOBodyText'])])
     left_col_data.append([Spacer(1, 10)])
     
     # KPI
     left_col_data.append([Paragraph("<font color='#E07020'><b>Service Delivery KPI</b></font>", styles['SectionHeader'])])
-    left_col_data.append([Paragraph(str(project['kpi']), styles['BodyText'])])
+    left_col_data.append([Paragraph(str(project['kpi']), styles['PMOBodyText'])])
     
     # Right column - Health and Activities
     right_col_data.append([Paragraph("<font color='#E07020'><b>Overall Project Health</b></font>", styles['SectionHeader'])])
@@ -215,12 +216,12 @@ def create_project_report_page(project, styles):
     
     # Current Activities
     right_col_data.append([Paragraph("<font color='#E07020'><b>Current Activities</b></font>", styles['SectionHeader'])])
-    right_col_data.append([Paragraph(str(project['current_activities']), styles['BodyText'])])
+    right_col_data.append([Paragraph(str(project['current_activities']), styles['PMOBodyText'])])
     right_col_data.append([Spacer(1, 8)])
     
     # Future Activities
     right_col_data.append([Paragraph("<font color='#E07020'><b>Future Activities</b></font>", styles['SectionHeader'])])
-    right_col_data.append([Paragraph(str(project['future_activities']), styles['BodyText'])])
+    right_col_data.append([Paragraph(str(project['future_activities']), styles['PMOBodyText'])])
     
     # Create left and right tables
     left_table = Table(left_col_data, colWidths=[4*inch])
@@ -282,7 +283,7 @@ def create_project_report_page(project, styles):
     # Comments section
     if project['comments'] and project['comments'] != '[To be provided]':
         elements.append(Paragraph("<font color='#E07020'><b>Comments / Notes</b></font>", styles['SectionHeader']))
-        elements.append(Paragraph(str(project['comments']), styles['BodyText']))
+        elements.append(Paragraph(str(project['comments']), styles['PMOBodyText']))
     
     # Deliverables placeholder
     elements.append(Spacer(1, 15))
