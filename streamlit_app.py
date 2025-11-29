@@ -15,9 +15,13 @@ from dotenv import load_dotenv
 # Load environment variables (for local development)
 load_dotenv()
 
-# For Streamlit Cloud, use st.secrets for API keys
-if "OPENAI_API_KEY" in st.secrets:
-    os.environ['OPENAI_API_KEY'] = st.secrets["OPENAI_API_KEY"]
+# For Streamlit Cloud, use st.secrets for API keys (if available)
+try:
+    if "OPENAI_API_KEY" in st.secrets:
+        os.environ['OPENAI_API_KEY'] = st.secrets["OPENAI_API_KEY"]
+except FileNotFoundError:
+    # No secrets file - this is normal for local development
+    pass
 
 # Import our modules
 from pmo_helpers import process_excel_file
