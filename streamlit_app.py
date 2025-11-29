@@ -4,6 +4,15 @@ Upload Excel file to generate professional SPLD reports
 """
 
 import streamlit as st
+
+# Page configuration MUST be first Streamlit command
+st.set_page_config(
+    page_title="SPLD PMO Report Generator",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 import pandas as pd
 import io
 import zipfile
@@ -19,7 +28,7 @@ load_dotenv()
 try:
     if "OPENAI_API_KEY" in st.secrets:
         os.environ['OPENAI_API_KEY'] = st.secrets["OPENAI_API_KEY"]
-except FileNotFoundError:
+except (FileNotFoundError, AttributeError):
     # No secrets file - this is normal for local development
     pass
 
@@ -29,14 +38,6 @@ from spld_exact_format import generate_spld_exact_report
 from spld_word_generator import create_spld_word_report
 from excel_generator import create_excel_report
 from llm_integration import format_project_text
-
-# Page configuration
-st.set_page_config(
-    page_title="SPLD PMO Report Generator",
-    page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 # Custom CSS for SPLD branding
 st.markdown("""
