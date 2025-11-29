@@ -25,8 +25,8 @@ COLUMN_MAPPING = {
     'project_health': ['Project health (on track - at risk - off track)', 'Project Health', 'Health', 'Status Health'],
     'issues': ['Issues (From Owner List)', 'Issues', 'Current Issues'],
     'risks': ['Risks', 'Risk', 'Project Risks'],
-    'current_activities': ['Current activites', 'Current Activities', 'Current Work'],
-    'future_activities': ['Future Activites', 'Future Activities', 'Next Steps', 'Upcoming Activities'],
+    'current_activities': ['Current activites', 'Current activities', 'Current Activities', 'Current Work', 'current activites'],
+    'future_activities': ['Future Activites', 'Future activities', 'Future Activities', 'Next Steps', 'Upcoming Activities', 'future activites'],
     'comments': ['Comments  to the owner', 'Comments', 'Notes', 'Owner Comments'],
     'vendor': ['Vendor', 'Supplier', 'Contractor']
 }

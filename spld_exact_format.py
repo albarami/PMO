@@ -248,34 +248,44 @@ def create_project_status_report(project, styles):
     current_activities = str(project.get('current_activities', '[To be provided]'))
     future_activities = str(project.get('future_activities', '[To be provided]'))
     
+    # Handle "Owner to share" placeholders
+    if 'owner to share' in current_activities.lower() or current_activities.strip() == 'NA':
+        current_activities = '[To be provided by project owner]'
+    if 'owner to share' in future_activities.lower() or future_activities.strip() == 'NA':
+        future_activities = '[To be provided by project owner]'
+    
     # Format activities if they're too long
-    if len(current_activities) > 150:
-        current_activities = current_activities[:147] + '...'
-    if len(future_activities) > 150:
-        future_activities = future_activities[:147] + '...'
+    if len(current_activities) > 200:
+        current_activities = current_activities[:197] + '...'
+    if len(future_activities) > 200:
+        future_activities = future_activities[:197] + '...'
     
     act_table = Table([
         ['Activity Progress'],
-        ['Current Activities'],
+        ['Current Activities:'],
         [current_activities],
-        ['Future Activities'],  
+        [''],  # Spacer row
+        ['Future Activities:'],  
         [future_activities]
-    ], colWidths=[2.8*inch])
+    ], colWidths=[3.2*inch])
     
     act_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, 0), SPLD_COLORS['gray_bg']),
+        ('BACKGROUND', (0, 0), (0, 0), SPLD_COLORS['orange']),  # Orange header
         ('BACKGROUND', (0, 1), (0, -1), SPLD_COLORS['gray_bg']),
         ('TEXTCOLOR', (0, 0), (0, -1), colors.white),
         ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),
         ('FONTNAME', (0, 1), (0, 1), 'Helvetica-Bold'),
-        ('FONTNAME', (0, 3), (0, 3), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (0, 0), 10),
-        ('FONTSIZE', (0, 1), (0, -1), 8),
+        ('FONTNAME', (0, 4), (0, 4), 'Helvetica-Bold'),  # Future Activities header
+        ('FONTSIZE', (0, 0), (0, 0), 11),
+        ('FONTSIZE', (0, 1), (0, 1), 9),
+        ('FONTSIZE', (0, 2), (0, 2), 8),  # Current activities text
+        ('FONTSIZE', (0, 4), (0, 4), 9),  # Future header
+        ('FONTSIZE', (0, 5), (0, 5), 8),  # Future activities text
         ('ALIGN', (0, 0), (0, 0), 'CENTER'),
         ('ALIGN', (0, 1), (0, -1), 'LEFT'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 8),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
     ]))
     
     right_col.append(act_table)
