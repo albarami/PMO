@@ -29,6 +29,8 @@ instance/
 
 # Environment variables
 .env
+.env.local
+.streamlit/secrets.toml
 .venv
 
 # IDE

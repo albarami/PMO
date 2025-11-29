@@ -13,6 +13,10 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.graphics.shapes import Drawing, Circle, String
 from reportlab.graphics.charts.piecharts import Pie
 from reportlab.graphics import renderPDF
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.utils import simpleSplit
+import html
 
 
 # SPLD Color Palette (from screenshots)
@@ -28,14 +32,53 @@ SPLD_COLORS = {
 }
 
 
+def clean_text_for_pdf(text):
+    """Clean and encode text for PDF to avoid font issues."""
+    if text is None:
+        return ""
+    
+    # Convert to string
+    text = str(text)
+    
+    # Replace None and NaN
+    if text.lower() in ['none', 'nan', 'null']:
+        return ""
+    
+    # Remove or replace problematic characters
+    text = text.encode('ascii', 'replace').decode('ascii')
+    
+    # Replace common problematic chars
+    replacements = {
+        '–': '-',  # en dash
+        '—': '-',  # em dash
+        ''': "'",  # smart quotes
+        ''': "'",
+        '"': '"',
+        '"': '"',
+        '…': '...',
+        '•': '-',  # bullet
+        '\t': ' ',  # tabs
+        '\n': ' ',  # newlines in table cells
+        '\r': ' '
+    }
+    
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    
+    # Ensure it's clean ASCII
+    text = ''.join(char if ord(char) < 128 else '?' for char in text)
+    
+    return text.strip()
+
+
 def create_project_status_report(project, styles):
     """Create exact SPLD project status page format FROM EXCEL DATA."""
     elements = []
     
     # Header with project info - READING FROM EXCEL
     header_data = [
-        ['Project Status Report', '', 'Project Sponsor', str(project.get('gm', 'TBD'))],
-        [str(project.get('name', 'Unnamed Project')), '', 'Project Manager', str(project.get('operational_lead', 'TBD'))],
+        ['Project Status Report', '', 'Project Sponsor', clean_text_for_pdf(project.get('gm', 'TBD'))],
+        [clean_text_for_pdf(project.get('name', 'Unnamed Project')), '', 'Project Manager', clean_text_for_pdf(project.get('operational_lead', 'TBD'))],
         [f'Report Date: {datetime.now().strftime("%d/%m/%Y")}', '', '', '']
     ]
     
@@ -95,9 +138,10 @@ def create_project_status_report(project, styles):
     
     # Project Objective - FROM EXCEL DATA
     # Try to get objective from various possible fields
-    objective_text = (project.get('description', '') or 
-                     project.get('comments', '') or 
-                     f"Managing and delivering {project.get('name', 'project')} successfully")[:300]
+    raw_objective = (project.get('description', '') or 
+                    project.get('comments', '') or 
+                    f"Managing and delivering {project.get('name', 'project')} successfully")
+    objective_text = clean_text_for_pdf(raw_objective[:300])
     
     obj_table = Table([
         ['Project Objective'],
@@ -245,8 +289,8 @@ def create_project_status_report(project, styles):
     right_col.append(Spacer(1, 15))
     
     # Activity Progress - FROM EXCEL DATA
-    current_activities = str(project.get('current_activities', '[To be provided]'))
-    future_activities = str(project.get('future_activities', '[To be provided]'))
+    current_activities = clean_text_for_pdf(project.get('current_activities', '[To be provided]'))
+    future_activities = clean_text_for_pdf(project.get('future_activities', '[To be provided]'))
     
     # Handle "Owner to share" placeholders
     if 'owner to share' in current_activities.lower() or current_activities.strip() == 'NA':
