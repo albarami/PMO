@@ -119,11 +119,19 @@ with col1:
                         status_text = st.empty()
                         
                         # Apply LLM formatting if available
-                        status_text.text("🤖 Applying text formatting...")
+                        status_text.text("🤖 Applying AI text formatting...")
                         progress_bar.progress(20)
                         
-                        for i in range(len(projects)):
-                            projects[i] = format_project_text(projects[i])
+                        # Check if LLM is configured
+                        from llm_integration import get_llm_formatter
+                        llm_formatter = get_llm_formatter()
+                        
+                        if llm_formatter:
+                            st.info(f"✅ AI Active: Using {llm_formatter.provider} ({llm_formatter.model})")
+                            for i in range(len(projects)):
+                                projects[i] = format_project_text(projects[i])
+                        else:
+                            st.warning("ℹ️ AI text formatting not configured - using original text")
                         
                         # Generate reports
                         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -237,6 +245,23 @@ with col1:
                     st.error(f"❌ An error occurred: {str(e)}")
 
 with col2:
+    # AI Configuration (Optional)
+    with st.expander("🤖 AI Text Formatting (Optional)"):
+        st.info("Enable AI to format activities, risks, and issues into clean bullet points")
+        
+        api_key = st.text_input("OpenAI API Key", type="password", 
+                               help="Enter your OpenAI API key for text formatting")
+        
+        if api_key:
+            os.environ['OPENAI_API_KEY'] = api_key
+            st.success("✅ AI key configured for this session")
+        else:
+            # Check if already in environment
+            if os.getenv('OPENAI_API_KEY'):
+                st.success("✅ AI configured from .env file")
+            else:
+                st.caption("AI formatting is optional - reports work without it")
+    
     # Features section
     st.markdown("### ✨ Features")
     
